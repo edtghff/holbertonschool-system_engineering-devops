@@ -1,0 +1,156 @@
+When a user types www.foobar.com
+ in their browser, the DNS resolves the domain name to the public IP address of the load balancer. The request then goes through the load balancer before reaching one of the backend servers.
+
+Infrastructure Overview
+
+User -> DNS -> HAProxy (HTTPS) -> Server A / Server B
+
+Each backend server includes:
+
+Nginx (web server)
+
+Application server
+
+Application code
+
+MySQL database
+
+Extra components:
+
+One firewall on each server (3 total)
+
+One SSL/TLS certificate for HTTPS
+
+One monitoring agent per server (3 total)
+
+1. Why These Components Are Added
+Firewalls
+
+Each server has its own firewall to control network traffic.
+
+Only necessary ports are allowed (like 443 for HTTPS).
+
+Sensitive ports like MySQL are blocked from public access.
+
+This helps protect the servers even if something else fails.
+
+SSL/TLS Certificate
+
+The SSL certificate is used to enable HTTPS.
+
+It encrypts the data between the user and the website.
+
+This prevents attackers from reading or changing the data.
+
+It also helps users trust the website.
+
+Monitoring Agents
+
+Monitoring agents are installed on every server.
+
+They collect system metrics (CPU, memory, disk).
+
+They collect logs from Nginx and the application.
+
+The data is sent to a monitoring service so we can see problems early.
+
+2. What Firewalls Are Used For
+
+Firewalls are used to filter incoming and outgoing traffic.
+
+They block unauthorized access.
+
+They make sure only trusted traffic can reach the services.
+
+They reduce the risk if a server is attacked.
+
+3. Why Traffic Is Served Over HTTPS
+
+HTTPS is used because:
+
+it encrypts communication,
+
+it protects user data,
+
+it prevents man-in-the-middle attacks,
+
+modern browsers expect websites to use HTTPS.
+
+4. What Monitoring Is Used For
+
+Monitoring helps us:
+
+check if servers are up or down,
+
+see performance issues,
+
+track errors and traffic,
+
+get alerts when something breaks,
+
+debug problems using logs.
+
+5. How Monitoring Collects Data
+
+Each server runs a monitoring agent.
+
+The agent reads system stats from the OS.
+
+It collects logs from services like Nginx.
+
+It sends the data to the monitoring platform over the network.
+This allows everything to be viewed in one place.
+
+6. How to Monitor Web Server QPS
+
+To monitor QPS (requests per second):
+
+Nginx exposes request metrics or logs.
+
+The monitoring tool counts the number of requests over time.
+
+QPS is calculated as how many requests happen per second.
+
+Alerts can be set if traffic is too high or too low.
+
+7. Problems With This Infrastructure
+a) SSL Termination at the Load Balancer
+
+If SSL is terminated at the load balancer:
+
+traffic between the load balancer and servers may be unencrypted,
+
+internal traffic could be exposed,
+
+this breaks end-to-end encryption.
+A common solution is to re-encrypt traffic internally.
+
+b) Only One MySQL Server Accepts Writes
+
+Having a single database that handles writes means:
+
+it is a single point of failure,
+
+write traffic cannot be scaled easily,
+
+if it goes down, the app cannot write data.
+Failover or multi-primary setups can help fix this.
+
+c) Same Components on Every Server
+
+Running web, app, and database on the same servers can cause:
+
+resource competition,
+
+harder scaling,
+
+bigger impact when one server fails,
+
+more complicated maintenance.
+
+Diagram below
+
+User -> DNS -> HAProxy -> Server A (Nginx, App, MySQL)
+-> Server B (Nginx, App, MySQL)
+
+Each server has a firewall and a monitoring agent.
