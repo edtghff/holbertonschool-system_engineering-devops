@@ -1,0 +1,91 @@
+When a user visits www.foobar.com
+, DNS resolves the domain name to a load balancer cluster made of two HAProxy servers. These load balancers are configured in an Active-Passive setup using a virtual IP. If the active HAProxy goes down, the passive one takes over automatically, so the website stays available.
+
+Request Flow
+
+User -> DNS -> HAProxy Cluster (Active-Passive) -> Web Server -> Application Server -> Database Server
+
+Infrastructure Components
+
+One additional server to separate roles
+
+HAProxy load balancer cluster (2 nodes)
+
+Web server (Nginx only)
+
+Application server (runs the application logic)
+
+Dedicated database server (MySQL)
+
+Why Each Component Is Added
+1. Additional Server
+
+An extra server is added so that services are not all running on the same machine.
+
+This separation reduces resource conflicts between services.
+
+It also makes the infrastructure easier to manage and scale.
+
+For example, we can add more web or application servers without changing the database.
+
+2. HAProxy Load Balancer Cluster
+
+The load balancer is set up as a cluster with two nodes.
+
+Only one HAProxy is active at a time, while the other stays passive.
+
+If the active node fails, the passive one becomes active automatically using a virtual IP.
+
+This setup removes the load balancer as a Single Point of Failure (SPOF) and improves availability.
+
+3. Split Web Server (Nginx)
+
+The web server is responsible only for handling HTTP requests and static files.
+
+It can also handle SSL termination and route requests to the application server.
+
+Keeping Nginx separate improves performance.
+
+It is easy to scale by adding more web servers behind the load balancer.
+
+4. Dedicated Application Server
+
+The application server runs the business logic of the website.
+
+It processes requests and communicates with the database.
+
+Separating it from the web server prevents overload.
+
+This allows horizontal scaling by adding more application servers if traffic increases.
+
+5. Dedicated Database Server (MySQL)
+
+The database is isolated on its own server.
+
+This improves performance and security.
+
+Databases use a lot of disk and memory, so separating them avoids conflicts.
+
+It also allows future improvements like replication, backups, and failover.
+
+High-Level Diagram (Text)
+
+Users -> DNS -> HAProxy Cluster (VIP)
+    Active LB <-> Passive LB
+        -> Web Server (Nginx)
+        -> Application Server
+        -> Database Server (MySQL)
+
+Summary
+
+This scale-up infrastructure improves:
+
+Availability: thanks to the HAProxy Active-Passive cluster
+
+Performance: because each service has its own role
+
+Scalability: servers can be added per layer
+
+Maintainability: components are separated and easier to debug or update
+
+By splitting the web, application, and database layers and adding a highly available load balancer, the system becomes more reliable and closer to a real production setup.
