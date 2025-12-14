@@ -1,0 +1,93 @@
+When a user wants to access a website, they type “www.foobar.com”
+ into their web browser.
+
+1. Domain Resolution
+
+The domain name foobar.com is registered and configured in the DNS.
+
+A DNS A record links the domain to an IP address:
+
+www.foobar.com → 8.8.8.8
+
+The purpose of the domain name is to translate a human-readable address into a server IP address.
+
+The “www” record is an A record that maps to an IPv4 address.
+
+2. Single Server Infrastructure (IP Address: 8.8.8.8)
+
+The website is hosted on a single server, which contains all the components required to run the application.
+
+a) Web Server (Nginx)
+
+Nginx receives HTTP/HTTPS requests from the user’s browser.
+
+It serves static files such as HTML, CSS, JavaScript, and images.
+
+It forwards dynamic requests to the application server for processing.
+
+b) Application Server
+
+The application server runs the website’s application code.
+
+It handles the business logic and processes dynamic requests.
+
+It generates responses such as HTML pages or JSON data.
+
+c) Application Files (Code Base)
+
+The code base contains the source code of the website.
+
+It defines how the application behaves and processes requests.
+
+This code is executed by the application server.
+
+d) Database (MySQL)
+
+The MySQL database stores persistent data, such as users, posts, or other records.
+
+The application server communicates with the database to read and write data.
+
+3. Communication Flow
+
+The user’s computer communicates with the server using HTTP/HTTPS over TCP.
+
+Nginx communicates internally with the application server.
+
+The application server connects to the MySQL database through a local connection.
+
+4. Definitions
+
+Server: A machine that provides services or resources to clients over a network.
+
+Domain name: Converts a readable website name into an IP address.
+
+Web server: Handles HTTP requests, serves static content, and forwards dynamic requests.
+
+Application server: Executes application logic and generates dynamic content.
+
+Database: Stores structured and persistent data.
+
+5. Limitations of This Infrastructure
+a) Single Point of Failure (SPOF)
+
+All components run on the same server.
+
+If the server fails, the entire website becomes unavailable.
+
+b) Downtime During Maintenance
+
+Maintenance tasks such as deploying new code, restarting services, or updating the system cause downtime.
+
+There is no redundancy to keep the website online during these operations.
+
+c) Lack of Scalability
+
+A single server cannot handle high traffic efficiently.
+
+Hardware resources such as CPU, RAM, disk I/O, and database capacity are limited.
+
+There is no load balancing or horizontal scaling implemented.
+
+Diagram
+
+User → DNS → Nginx (Web Server) → Application Server → MySQL (Database)
