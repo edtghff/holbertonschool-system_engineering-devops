@@ -1,0 +1,115 @@
+When a user types “www.foobar.com”
+ into their browser, the DNS resolves the domain name to the public IP address of the load balancer.
+
+Overview of the Distributed Infrastructure
+
+User -> DNS -> HAProxy (Load Balancer) -> Server 1 or & Server 2
+
+Each backend server contains:
+
+Nginx (web server)
+
+Application server
+
+Application files (code base)
+
+MySQL database instance
+
+1. Purpose of Each Component
+Load Balancer (HAProxy)
+
+HAProxy is added to distribute incoming traffic between multiple backend servers.
+
+It improves availability and performance by preventing all requests from going to a single server.
+
+If one backend server becomes unavailable, HAProxy can continue sending traffic to the remaining server.
+
+Two Backend Servers
+
+Two servers are used to provide redundancy and better traffic handling.
+
+Traffic is shared between the servers, reducing load on each one.
+
+If one server fails, the other can continue serving requests, improving reliability.
+
+MySQL Primary–Replica Architecture
+
+The database is split into a Primary and a Replica.
+
+This setup adds data redundancy and improves read performance.
+
+It also helps protect against data loss if one database instance fails.
+
+2. Load Balancer Distribution Algorithm
+
+The load balancer is configured to use the Round Robin algorithm.
+
+How it works:
+HAProxy sends each new incoming request to the next server in order.
+
+Request 1 -> Server 1
+
+Request 2 -> Server 2
+
+Request 3 -> Server 1
+
+This ensures traffic is evenly distributed across the backend servers.
+
+3. Active-Active vs Active-Passive Load Balancer
+
+Active-Active:
+Multiple load balancers handle traffic at the same time. If one fails, the others continue without downtime.
+
+Active-Passive:
+One load balancer is active while the second is on standby. The passive one becomes active only if the main one fails.
+
+In this infrastructure:
+Only one HAProxy instance is used, so the load balancer itself is a Single Point of Failure (SPOF).
+
+4. Database Primary–Replica (Master–Slave) Architecture
+
+The Primary (Master) database handles all write operations such as INSERT, UPDATE, and DELETE.
+
+The Replica (Slave) database copies data from the Primary using replication.
+
+The application sends write requests only to the Primary.
+
+Read requests can be sent to either the Primary or the Replica.
+
+Difference for the Application
+
+Primary database: accepts both reads and writes.
+
+Replica database: accepts only read operations and cannot be written to by the application.
+
+5. Issues with This Infrastructure
+a) Single Points of Failure (SPOF)
+
+The load balancer (HAProxy) is a SPOF since there is only one instance.
+
+The Primary MySQL database is a SPOF for write operations.
+
+If a backend server stores data or state that is not replicated, it can also become a SPOF.
+
+b) Security Issues
+
+HTTPS is not enabled, so data is transferred in plain text.
+
+There is no firewall to restrict access to required ports only.
+
+Database ports may be exposed to the public internet.
+
+There is no private internal network for server-to-server communication.
+
+c) No Monitoring
+
+There is no monitoring system to track server health or resource usage.
+
+No alerts are set up to notify administrators if a server goes down.
+
+Logs are not centralized, making troubleshooting harder.
+
+Diagram
+
+User -> DNS -> HAProxy -> Server 1 (Nginx, App Server, App Files, MySQL Primary)
+then goes -> Server 2 (Nginx, App Server, App Files, MySQL Replica)
